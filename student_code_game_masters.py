@@ -34,7 +34,26 @@ class TowerOfHanoiGame(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### student code goes here
-        pass
+
+        #remember this is hanoi
+        output = [[],[],[]]
+        
+        peg1 = parse_input('fact: (on ?x peg1)')
+        peg2 = parse_input('fact: (on ?x peg2)')
+        peg3 = parse_input('fact: (on ?x peg3)')
+
+        peglist = [peg1,peg2,peg3]
+
+        for i, q in enumerate(peglist):
+            bind_exists = self.kb.kb_ask(q)
+            if bind_exists:
+                for item in bind_exists:
+                    disk = item.bind_exists[0].constant.element[-1]
+                    peglist[i].append(int(disk))
+                peglist[i].sort()
+
+        peglist = tuple([tuple(item) for item in peglist])
+        return peglist
 
     def makeMove(self, movable_statement):
         """
@@ -100,7 +119,29 @@ class Puzzle8Game(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### Student code goes here
-        pass
+        state = [[],[],[]]
+        l1 = 'fact: (location ?x {} pos1)'
+        l2 = 'fact: (location ?x {} pos2)'
+        l3 = 'fact: (location ?x {} pos3)'
+
+        ask_loc = [l1,l2,l3]
+        axis = ['pos1', 'pos2','pos3']
+
+        for i,q in enumerate(locations):
+            foreach x in axis:
+                p1  = q.format(x)
+                question = parse_input(p1)
+                exist = self.kb.kb_ask(question)
+                tile = exist[0].bindings[0].constant.element
+                if tile == 'empty':
+                    state[i].append(-1)
+                else:
+                    state[i].append(int(tile[-1]))
+
+        state = tuple([tuple(item) for item in state])
+
+        return state
+
 
     def makeMove(self, movable_statement):
         """
