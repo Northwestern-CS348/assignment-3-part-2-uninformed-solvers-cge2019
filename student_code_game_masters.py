@@ -35,25 +35,24 @@ class TowerOfHanoiGame(GameMaster):
         """
         ### student code goes here
 
-        #remember this is hanoi
-        output = [[],[],[]]
-        
-        peg1 = parse_input('fact: (on ?x peg1)')
-        peg2 = parse_input('fact: (on ?x peg2)')
-        peg3 = parse_input('fact: (on ?x peg3)')
+        disks = {}
+        disk = ''
+        ask = [parse_input("fact: (on ?disk peg1)")]
+        ask.append(parse_input("fact: (on ?disk peg2)"))
+        ask.append(parse_input("fact: (on ?disk peg3)"))
+        tuples = []
+        for question in range(3):
+            bindings = self.kb.kb_ask(ask[question])
+            disks[question] = []
+            if bindings:
+                for b in bindings:
+                    b = list(b.bindings_dict.values())[0]
+                    disk = int(''.join(el for el in b if el.isdigit()))
+                    disks[question].append(disk)
+            tuples.append(tuple(sorted(disks[question])))
 
-        peglist = [peg1,peg2,peg3]
-
-        for i, q in enumerate(peglist):
-            bind_exists = self.kb.kb_ask(q)
-            if bind_exists:
-                for item in bind_exists:
-                    disk = item.bind_exists[0].constant.element[-1]
-                    peglist[i].append(int(disk))
-                peglist[i].sort()
-
-        peglist = tuple([tuple(item) for item in peglist])
-        return peglist
+        tuples = tuple(tuples)
+        return tuples
 
     def makeMove(self, movable_statement):
         """
@@ -71,8 +70,40 @@ class TowerOfHanoiGame(GameMaster):
         Returns:
             None
         """
-        ### Student code goes here
-        pass
+        ### Student code goes heredisk = movable_statement.terms[0].term.element
+        init_peg = movable_statement.terms[1].term.element
+        init_peg_num = int(''.join(el for el in init_peg if el.isdigit()))
+        new_peg = movable_statement.terms[2].term.element
+
+        # Change what's on what
+        fact = parse_input("fact: (on " + disk + " " + init_peg + ")")
+        self.kb.kb_retract(fact)
+        new_fact = parse_input("fact: (on " + disk + " " + new_peg + ")")
+        self.kb.kb_assert(new_fact)
+
+        # Change empties and tops for destination peg
+        old_empty = parse_input("fact: (empty " + new_peg + ")")
+        self.kb.kb_retract(old_empty)
+        old_top_binding = self.kb.kb_ask(parse_input("fact: (top ?disk " + new_peg + ")"))
+        old_top_disk = ''
+        if old_top_binding:
+            old_top_disk = old_top_binding[0].bindings[0].constant.element
+        old_top_dst = parse_input("fact: (top " + old_top_disk + " " + new_peg + ")")
+        self.kb.kb_retract(old_top_dst)
+        new_top_dst = parse_input("fact: (top " + disk + " " + new_peg + ")")
+        self.kb.kb_assert(new_top_dst)
+
+        # Change empties and tops for original peg
+        self.kb.kb_retract(parse_input("fact: (top " + disk + " " + init_peg + ")"))
+        on_init_peg = self.getGameState()[init_peg_num - 1]
+        if not on_init_peg:
+            new_empty = parse_input("fact: (empty " + init_peg + ")")
+            self.kb.kb_assert(new_empty)
+        else:
+            self.kb.kb_assert(parse_input("fact: (top disk" + str(on_init_peg[0]) + " " + init_peg + ")"))
+
+        return
+
 
     def reverseMove(self, movable_statement):
         """
@@ -127,8 +158,8 @@ class Puzzle8Game(GameMaster):
         ask_loc = [l1,l2,l3]
         axis = ['pos1', 'pos2','pos3']
 
-        for i,q in enumerate(locations):
-            foreach x in axis:
+        for i,q in enumerate(ask_loc):
+            for x in axis:
                 p1  = q.format(x)
                 question = parse_input(p1)
                 exist = self.kb.kb_ask(question)
@@ -160,7 +191,25 @@ class Puzzle8Game(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+        given = movable_statement.terms
+        tile = given[0]
+        x = given[1]
+        y =given[2]
+        newx = given[3]
+        newy = given[4]
+        #retract this
+        old_loc = parse_input('fact: (location {} {} {})').format(tile,x,y)
+        old_empty_loc = parse_input('fact: (location empty {} {})').format(newx, newy)
+        self.kb.kb_retract(old_loc)
+        self.kb.kb_retract(old_empty_loc)
+
+        #assert this
+        new_loc = parse_input('fact: (location {} {} {})').format(tile, newx, newy)
+        new_empty_loc = parse_input('fact: (location empty {} {})').format(x, y)
+        self.kb.kb_assert(new_loc)
+        self.kb.kb_assert(new_empty_loc)
+
+        
 
     def reverseMove(self, movable_statement):
         """

@@ -46,6 +46,7 @@ fact: (top disk2 peg2)
 fact: (top disk3 peg1)
 
 rule: ((larger ?x ?y) (larger ?y ?z) -> (larger ?x ?z))
+rule: ((larger ?x ?y) -> (smaller ?y ?x))
 
 rule: ((top ?disk ?initial) (empty ?target) -> (movable ?disk ?initial ?target))
 rule: ((top ?diskA ?initial) (top ?diskB ?target) (larger ?diskB ?diskA) -> (movable ?diskA ?initial ?target))

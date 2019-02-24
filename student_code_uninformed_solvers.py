@@ -19,7 +19,41 @@ class SolverDFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
-        return True
+        
+        #pre-set move as explored + get moves + check if win
+        self.visited[self.currentState] = True
+
+        options = self.gm.getMovables() 
+        nextmove = self.currentState.nextChildToVisit
+        if self.currentState.state == self.victoryCondition:
+            return True
+
+
+        while nextmove < len(options):
+            n = options[nextmove]
+            self.gm.makeMove(n)
+            game_state = self.gm.getGameState()
+
+            #action done before?
+            done = False
+            for state in self.visited.keys():
+                if state.state == game_state:
+                    done = True
+
+            if done:
+                self.gm.reverseMove(n)
+                nextmove +=1
+
+            #now we know if action has been done or not, add new child node for actions
+            else:
+                new_state = GameState(game_state, self.currentState.depth + 1, n)
+                new_state.parent = self.currentState
+                self.currentState.children.append(new_state)
+                self.currentState.nextChildToVisit = nextmove + 1
+                
+                self.currentState = new_state
+                break
+        return False
 
 
 class SolverBFS(UninformedSolver):

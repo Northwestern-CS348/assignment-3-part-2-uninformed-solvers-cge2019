@@ -38,6 +38,7 @@ fact: (ontop disk1 disk2)
 fact: (ontop disk2 disk3)
 
 rule: ((larger ?x ?y) (larger ?y ?z) -> (larger ?x ?z))
+rule: ((larger ?x ?y) -> (smaller ?y ?x))
 
 fact: (top disk1 peg1)
 fact: (empty peg2)

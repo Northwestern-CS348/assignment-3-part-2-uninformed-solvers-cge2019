@@ -49,7 +49,7 @@ fact: (ontop disk4 disk5)
 fact: (ontop disk5 base1)
 
 rule: ((larger ?x ?y) (larger ?y ?z) -> (larger ?x ?z))
-
+rule: ((larger ?x ?y) -> (smaller ?y ?x))
 fact: (top disk1 peg1)
 fact: (empty peg2)
 fact: (empty peg3)
